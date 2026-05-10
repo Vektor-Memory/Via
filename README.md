@@ -5,6 +5,8 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/@vektormemory/via)](https://npmjs.com/package/@vektormemory/via)
 
+https://medium.com/@vektormemory/all-roads-lead-to-ai-rome-1c601f1ec440
+
 Via is the universal integration layer for AI tools. One CLI that connects Claude, Cursor, Windsurf, and ChatGPT to a shared memory, task board, and context bus — so your work follows you across every tool, every session, every machine.
 
 Part of the Vektor ecosystem alongside [Vex](https://github.com/Vektor-Memory/Vex) and [Slipstream](https://vektormemory.com).
