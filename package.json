@@ -1,0 +1,43 @@
+{
+  "name": "@vektor/via",
+  "version": "0.2.7",
+  "description": "Route anything. Remember everything. Works everywhere. Universal AI tool integration layer by Vektor Memory.",
+  "type": "module",
+  "main": "via.mjs",
+  "bin": {
+    "via": "./via.mjs"
+  },
+  "scripts": {
+    "start": "node via.mjs",
+    "test": "node --test tests/",
+    "prepack": "node -e \"const fs=require('fs');const v=JSON.parse(fs.readFileSync('package.json')).version;let c=fs.readFileSync('via.mjs','utf8');c=c.replace(/const VERSION = '[^']+'/,\\`const VERSION = '\\${v}'\\`);fs.writeFileSync('via.mjs',c);\""
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "memory",
+    "claude",
+    "cursor",
+    "windsurf",
+    "context",
+    "agent",
+    "vektor",
+    "universal"
+  ],
+  "author": "Vektor Memory <hello@vektormemory.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/Vektor-Memory/Via",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vektor-Memory/Via.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Vektor-Memory/Via/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "sql.js": "^1.14.1"
+  }
+}

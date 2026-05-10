@@ -3,145 +3,188 @@
 > Route anything. Remember everything. Works everywhere.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![npm](https://img.shields.io/badge/npx-via-black)](https://npmjs.com/package/via)
+[![npm](https://img.shields.io/npm/v/@vektor/via)](https://npmjs.com/package/@vektor/via)
 
-Via is the universal integration layer for AI tools. It connects Claude, Cursor, Windsurf, ChatGPT, LangChain, and every other AI tool to a shared context, task, and memory bus — so your work follows you across every tool, every session, every machine.
+Via is the universal integration layer for AI tools. One CLI that connects Claude, Cursor, Windsurf, and ChatGPT to a shared memory, task board, and context bus — so your work follows you across every tool, every session, every machine.
 
-Part of the Vektor ecosystem alongside [Vex](https://github.com/Vektor-Memory/Vex) and [Vek-Sync](https://github.com/Vektor-Memory/Vek-Sync).
+Part of the Vektor ecosystem alongside [Vex](https://github.com/Vektor-Memory/Vex) and [Slipstream](https://vektormemory.com).
 
 ---
 
 ## The problem
 
-Every AI tool remembers inside its own walls. Claude forgets what you did in Cursor. Cursor forgets what you built in Windsurf. The moment you switch tools — or open a new session — context starts from zero. There is no bus between them.
+Every AI tool remembers inside its own walls. Claude forgets what you did in Cursor. Cursor forgets what you built in Windsurf. The moment you switch tools — or open a new session — context resets to zero.
 
-Via is that bus.
+Via is the bus between them.
 
 ---
 
 ## Install
 
 ```bash
-npm install -g via
-# or run without installing
-npx via --help
+npm install -g @vektor/via
+via --help
 ```
 
-**Requirements:** Node.js >= 18. Zero runtime dependencies for core commands.
+**Requirements:** Node.js >= 18. No native dependencies.
+
+---
+
+## What makes Via different
+
+### `via diff` — Compare AI tools side by side
+
+The feature no other tool has. Ask the same question to Claude and Cursor, then see exactly where they agree, diverge, and what unique concepts each one brought.
+
+```bash
+via diff "explain microservices"
+via diff add claude "Microservices split apps into small independent services..."
+via diff add cursor "Microservices are small focused services that communicate via APIs..."
+via diff show
+```
+
+```
+┌─ DIFF — explain microservices ────────────────
+│ claude          12 words
+│ cursor          14 words
+│ similarity      21% word overlap
+│
+│  claude                          |  cursor
+│  ──────────────────────────────  |  ──────────────────────────────
+│  Microservices split apps into   |  Microservices are small focused
+│  small independent services...   |  services that communicate via...
+│
+│ claude unique terms  independent, database
+│ cursor unique terms  focused, communicate, deployed
+└───────────────────────────────────────────────
+```
+
+### `via memory` — Relationship-aware code indexing
+
+Point at any folder and Via extracts symbols, imports, and function definitions from 10+ languages — then builds an import graph in SQLite. Search traverses relationships, not just text.
+
+```bash
+via memory add --file ./src/
+# → extracts symbols + import edges from JS/TS/Python/Go/Rust
+# → via memory search "auth" returns auth.js + every file that imports it
+```
+
+```
+┌─ MEMORY — SEARCH: auth ───────────────────────
+│
+│  Direct matches (2 files)
+│    ● auth.js       ./src/auth.js
+│    ● config.js     ./src/config.js
+│
+│  Related via imports (3 files)
+│    ○ server.js     ./src/server.js
+│    ○ middleware.js ./src/middleware.js
+│    ○ routes.js     ./src/routes/auth.js
+└───────────────────────────────────────────────
+```
+
+No embeddings. No API calls. Pure local SQLite graph.
 
 ---
 
 ## Commands
 
-### `via context`
-Inject the right memory into any AI tool's system prompt.
+### `via init`
+Wire via into every AI tool detected — one command, fully configured.
 ```bash
-via context --query "current project" --for cursor
-via context --query "what am I building" --for claude
-via context --query "open decisions" --for chatgpt
+via init           # writes MCP config for Claude Desktop, Cursor, Windsurf
+via init --dry-run # preview what would be written
 ```
 
-### `via handoff`
-Transfer your full working state between tools.
+### `via memory`
+Fact storage + relationship-aware codebase indexing.
 ```bash
-via handoff --export                        # save current state to .vstate.json
-via handoff --import .vstate.json --to cursor
+via memory add "JWT tokens expire in 1h"          # store a fact
+via memory add --file ./src/                      # index a codebase
+via memory search "auth"                          # search + related files
+via memory graph                                  # show import relationships
+via memory list                                   # list indexed files + facts
 ```
 
 ### `via task`
-Shared persistent task board any AI tool can read and write.
+Shared persistent task board any AI tool can read and write via MCP.
 ```bash
-via task add "refactor auth module"
-via task list
-via task update <id> --status done
-via task next                               # what should the next AI pick up
+via task add "refactor auth module" --high
+via task
+via task done <id>
+via task start <id>
 ```
 
-### `via persona`
-Named agent personas with role memory and system prompts.
+### `via log`
+Unified activity log. Auto-captures Claude Code sessions.
 ```bash
-via persona create cto --role "technical decision maker"
-via persona use cto --in cursor
-via persona list
+via log "decided to use postgres" --tool claude
+via log --scan     # one-shot capture of all Claude Code sessions
+via log --watch    # live capture as sessions complete
+via log --today
+via log search "postgres"
 ```
 
-### `via spend`
-Unified token and cost tracking across all AI tools.
+### `via ask`
+Route a question to the right AI tool — and open it.
 ```bash
-via spend today
-via spend session
-via spend leaks                             # detect wasteful patterns
-via spend export --format csv
+via ask "should I use postgres or sqlite?"        # opens recommended tool
+via ask "refactor auth module" --tool cursor      # force a specific tool
+via ask "explain this architecture" --no-open     # recommend only
 ```
 
-### `via scaffold`
-Deploy a complete AI working setup to any project in one command.
+### `via diff`
+Compare what two AI tools said about the same prompt.
 ```bash
-via scaffold init                           # detect installed tools, wire everything
-via scaffold --preset solo-dev
-via scaffold --preset startup-team
-via scaffold --preset enterprise-audit
+via diff "your prompt"          # register a new prompt
+via diff add claude "..."       # store Claude's response
+via diff add cursor "..."       # store Cursor's response
+via diff show                   # side-by-side + unique terms
+via diff list                   # all saved comparisons
 ```
 
-### `via watch`
-Event routing when any AI tool completes a task.
+### `via handoff`
+Export your full working state before switching tools.
 ```bash
-via watch --on task-complete --notify desktop
-via watch --on task-complete --webhook https://hooks.slack.com/...
-via watch --on session-end --notify discord
+via handoff --export                        # saves .vstate.json
+via handoff --import ./sprint3.vstate.json  # restore on any machine
+via handoff --list
 ```
 
-### `via audit`
-Compliance memory. Log every significant AI decision.
+### `via serve`
+Run Via as an MCP server. Claude Desktop, Cursor, and Windsurf can call via tools natively.
 ```bash
-via audit log "decided to use PostgreSQL over MySQL"
-via audit list --last 7d
-via audit export --format jsonl
+via serve           # stdio (Claude Desktop, Cursor)
+via serve --sse     # HTTP+SSE mode
 ```
 
-### `via sync`
-Backup and restore your entire AI setup across machines.
-```bash
-via sync backup --to github
-via sync restore --from github
-via sync status
+Claude Desktop config:
+```json
+{
+  "mcpServers": {
+    "via": { "command": "via", "args": ["serve"] }
+  }
+}
 ```
 
-### `via ingest`
-Universal knowledge intake. Point at anything.
-```bash
-via ingest https://docs.example.com
-via ingest ./architecture.md
-via ingest ./src/                           # whole directory
-```
-
-### `via route`
-Which AI tool should handle this task?
-```bash
-via route "write unit tests for auth module"
-via route "research competitor pricing"
-via route "refactor this file" --budget 0.10
-```
-
-### `via status`
-Full ecosystem health in one command.
-```bash
-via status
-# → tools connected, memory live, token spend today, open tasks
-```
+Or just run `via init` — it writes this automatically.
 
 ---
 
-## Connectors
+## MCP Tools (via serve)
 
-| Tool | context | handoff | task | spend | status |
-|---|---|---|---|---|---|
-| Claude Code | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Cursor | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Windsurf | ✅ | 🔜 | ✅ | ✅ | ✅ |
-| ChatGPT | ✅ | 🔜 | 🔜 | ✅ | 🔜 |
-| LangChain | ✅ | ✅ | ✅ | 🔜 | 🔜 |
-| Slipstream | ✅ | ✅ | ✅ | ✅ | ✅ |
+When running as an MCP server, Claude Desktop and Cursor can call:
+
+| Tool | Description |
+|---|---|
+| `via_task_list` | List open tasks |
+| `via_task_add` | Add a task |
+| `via_task_done` | Mark task done |
+| `via_memory_add` | Store a fact |
+| `via_memory_search` | Search stored facts (relationship-aware) |
+| `via_log` | Log a decision or event |
+| `via_context` | Pull formatted memory context |
+| `via_status` | Ecosystem health check |
 
 ---
 
@@ -150,35 +193,27 @@ via status
 | Tool | What it does |
 |---|---|
 | [Vex](https://github.com/Vektor-Memory/Vex) | Migrate agent memory between vector stores |
-| [Vek-Sync](https://github.com/Vektor-Memory/Vek-Sync) | Keep MCP configs in sync across AI editors |
 | **Via** | Route context and execution across all AI tools |
-| [Slipstream](https://vektormemory.com) | The intelligence engine underneath — graph memory, vector search, stealth fetch, multimodal |
+| [Slipstream](https://vektormemory.com) | The intelligence engine — graph memory, vector search, multimodal |
 
-Via uses SQLite locally. When you need semantic search, graph traversal, temporal memory, or team-shared context — upgrade to [Vektor Slipstream](https://vektormemory.com).
+Via uses SQLite locally. No embeddings, no API calls for indexing. When you need semantic search, graph traversal, or team-shared context — upgrade to [Vektor Slipstream](https://vektormemory.com).
 
 ---
 
 ## Roadmap
 
-**v0.1 — core**
-- `via context`, `via task`, `via status`
-- Claude Code + Cursor connectors
-- SQLite local store
+**v0.2 — current**
+- `via init`, `via memory`, `via task`, `via log`, `via ask`, `via diff`
+- Relationship-aware codebase indexing — symbols + import graph in SQLite
+- Claude Code session auto-capture
+- MCP server with 8 tools
+- Claude Desktop, Cursor, Windsurf support
 
-**v0.2 — execution**
-- `via handoff`, `via persona`, `via watch`
-- Windsurf + LangChain connectors
-- `.vstate.json` spec v1.0
-
-**v0.3 — intelligence**
-- `via spend`, `via audit`, `via ingest`
-- ChatGPT connector
-- Slipstream upgrade bridge
-
-**v0.4 — teams**
-- `via scaffold`, `via route`, `via sync`
+**v0.3 — coming**
+- Import edge traversal on Windows path fix
+- `via memory search` semantic upgrade via Slipstream
 - Team-shared task board
-- Enterprise audit export
+- `via diff --live` real-time comparison
 
 ---
 
