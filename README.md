@@ -7,6 +7,9 @@
 
 https://medium.com/@vektormemory/all-roads-lead-to-ai-rome-1c601f1ec440
 
+<img width="1077" height="404" alt="image" src="https://github.com/user-attachments/assets/b6d5ceac-a246-4f75-9e9a-181d5252e087" />
+
+
 Via is the universal integration layer for AI tools. One CLI that connects Claude, Cursor, Windsurf, and ChatGPT to a shared memory, task board, and context bus — so your work follows you across every tool, every session, every machine.
 
 Part of the Vektor ecosystem alongside [Vex](https://github.com/Vektor-Memory/Vex) and [Slipstream](https://vektormemory.com).
@@ -20,6 +23,8 @@ Every AI tool remembers inside its own walls. Claude forgets what you did in Cur
 Via is the bus between them.
 
 ---
+
+<img width="1040" height="535" alt="image" src="https://github.com/user-attachments/assets/4966388f-75db-413b-bc12-9e2427e078fb" />
 
 ## Install
 
