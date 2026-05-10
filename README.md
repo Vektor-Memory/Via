@@ -3,7 +3,7 @@
 > Route anything. Remember everything. Works everywhere.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![npm](https://img.shields.io/npm/v/@vektor/via)](https://npmjs.com/package/@vektor/via)
+[![npm](https://img.shields.io/npm/v/@vektormemory/via)](https://npmjs.com/package/@vektormemory/via)
 
 Via is the universal integration layer for AI tools. One CLI that connects Claude, Cursor, Windsurf, and ChatGPT to a shared memory, task board, and context bus — so your work follows you across every tool, every session, every machine.
 
@@ -22,7 +22,7 @@ Via is the bus between them.
 ## Install
 
 ```bash
-npm install -g @vektor/via
+npm install -g @vektormemory/via
 via --help
 ```
 
@@ -85,6 +85,32 @@ via memory add --file ./src/
 
 No embeddings. No API calls. Pure local SQLite graph.
 
+### `via convert` — Local file conversion pipeline
+
+Convert any file locally — audio, video, images, documents, archives — powered by FFmpeg, ImageMagick, Pandoc, and LibreOffice. Nothing uploaded anywhere. Pipe output directly into via memory with `--ingest`.
+
+```bash
+via convert ./report.pdf --to md                  # pdf → markdown
+via convert ./recording.mp3 --to txt              # audio → transcript
+via convert ./video.mp4 --to gif                  # video → gif
+via convert ./doc.docx --to pdf                   # office → pdf
+via convert ./report.pdf --to md --ingest         # convert + store in memory
+via convert --check                               # check installed tools
+via convert --formats                             # all supported formats
+```
+
+```
+┌─ CONVERT — TOOL CHECK ────────────────────────
+│ FFmpeg          installed  audio/video
+│ ImageMagick     installed  images
+│ Pandoc          installed  documents
+│ LibreOffice     installed  office docs
+│ Poppler         installed  pdf→txt
+│ Zip             installed  archives
+│ 7-Zip           installed  7z archives
+└───────────────────────────────────────────────
+```
+
 ---
 
 ## Commands
@@ -105,6 +131,29 @@ via memory search "auth"                          # search + related files
 via memory graph                                  # show import relationships
 via memory list                                   # list indexed files + facts
 ```
+
+### `via convert`
+Local file conversion. No uploads. Optional memory pipeline.
+```bash
+via convert <file> --to <format>                  # convert a file
+via convert <file> --to md --ingest               # convert + store in memory
+via convert --check                               # check installed tools
+via convert --formats                             # show all supported formats
+```
+
+Supported formats:
+
+```
+Images     png jpg webp gif bmp tiff ico svg  →  png jpg webp gif bmp tiff ico pdf
+Audio      mp3 wav ogg m4a aac flac aiff wma  →  mp3 wav ogg m4a aac flac aiff
+Video      mp4 mkv mov avi webm flv wmv       →  mp4 mkv mov avi webm gif mp3
+Documents  md rst html txt tex org epub       →  md html txt pdf epub docx odt
+Office     docx doc odt rtf xlsx pptx         →  pdf txt html odt docx
+PDF        pdf                                →  txt md html docx
+Archives   any file or folder                 →  zip tar.gz 7z
+```
+
+External tools required: FFmpeg, ImageMagick, Pandoc, LibreOffice, Poppler, 7-Zip.
 
 ### `via task`
 Shared persistent task board any AI tool can read and write via MCP.
@@ -175,26 +224,26 @@ Or just run `via init` — it writes this automatically.
 
 When running as an MCP server, Claude Desktop and Cursor can call:
 
-| Tool | Description |
-|---|---|
-| `via_task_list` | List open tasks |
-| `via_task_add` | Add a task |
-| `via_task_done` | Mark task done |
-| `via_memory_add` | Store a fact |
-| `via_memory_search` | Search stored facts (relationship-aware) |
-| `via_log` | Log a decision or event |
-| `via_context` | Pull formatted memory context |
-| `via_status` | Ecosystem health check |
+```
+via_task_list      List open tasks
+via_task_add       Add a task
+via_task_done      Mark task done
+via_memory_add     Store a fact
+via_memory_search  Search stored facts (relationship-aware)
+via_log            Log a decision or event
+via_context        Pull formatted memory context
+via_status         Ecosystem health check
+```
 
 ---
 
 ## Vektor ecosystem
 
-| Tool | What it does |
-|---|---|
-| [Vex](https://github.com/Vektor-Memory/Vex) | Migrate agent memory between vector stores |
-| **Via** | Route context and execution across all AI tools |
-| [Slipstream](https://vektormemory.com) | The intelligence engine — graph memory, vector search, multimodal |
+```
+Via          Route context and execution across all AI tools
+Vex          Migrate agent memory between vector stores
+Slipstream   Graph memory, vector search, multimodal
+```
 
 Via uses SQLite locally. No embeddings, no API calls for indexing. When you need semantic search, graph traversal, or team-shared context — upgrade to [Vektor Slipstream](https://vektormemory.com).
 
@@ -202,18 +251,19 @@ Via uses SQLite locally. No embeddings, no API calls for indexing. When you need
 
 ## Roadmap
 
-**v0.2 — current**
-- `via init`, `via memory`, `via task`, `via log`, `via ask`, `via diff`
+**v0.3 — current**
+- `via init`, `via memory`, `via convert`, `via task`, `via log`, `via ask`, `via diff`
 - Relationship-aware codebase indexing — symbols + import graph in SQLite
+- Local file conversion pipeline — FFmpeg, Pandoc, LibreOffice, ImageMagick
 - Claude Code session auto-capture
 - MCP server with 8 tools
 - Claude Desktop, Cursor, Windsurf support
 
-**v0.3 — coming**
-- Import edge traversal on Windows path fix
-- `via memory search` semantic upgrade via Slipstream
+**v0.4 — coming**
+- `via memory` semantic search upgrade via Slipstream
 - Team-shared task board
 - `via diff --live` real-time comparison
+- `via convert` batch mode — convert entire folders
 
 ---
 

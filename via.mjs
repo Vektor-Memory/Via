@@ -70,6 +70,7 @@ function blank() { console.log('  ' + BAR); }
 const COMMANDS = {
   init:    'Wire via into Claude Desktop, Cursor, Windsurf automatically',
   memory:  'Store and search facts across all your AI tools',
+  convert: 'Convert any file locally — image, audio, video, doc, archive',
   task:    'Shared persistent task board',
   handoff: 'Transfer working state between AI tools',
   log:     'Unified activity log — decisions, spend, events',
@@ -87,7 +88,7 @@ function cmdHelp() {
   banner();
 
   box('COMMANDS');
-  const primary = ['init','memory','task','handoff','log','ask','diff','serve'];
+  const primary = ['init','memory','convert','task','handoff','log','ask','diff','serve'];
   for (const cmd of primary) {
     row(W(cmd), Gr(COMMANDS[cmd]));
   }

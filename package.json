@@ -1,6 +1,6 @@
 {
-  "name": "@vektor/via",
-  "version": "0.2.7",
+  "name": "@vektormemory/via",
+  "version": "0.3.0",
   "description": "Route anything. Remember everything. Works everywhere. Universal AI tool integration layer by Vektor Memory.",
   "type": "module",
   "main": "via.mjs",

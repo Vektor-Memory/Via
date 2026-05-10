@@ -1,0 +1,236 @@
+<h1 id="via-by-vektor-memory">Via — by Vektor Memory</h1>
+<blockquote>
+<p>Route anything. Remember everything. Works everywhere.</p>
+</blockquote>
+<p><a href="LICENSE"><img
+src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"
+alt="License: Apache-2.0" /></a> <a
+href="https://npmjs.com/package/@vektor/via"><img
+src="https://img.shields.io/npm/v/@vektor/via" alt="npm" /></a></p>
+<p>Via is the universal integration layer for AI tools. One CLI that
+connects Claude, Cursor, Windsurf, and ChatGPT to a shared memory, task
+board, and context bus — so your work follows you across every tool,
+every session, every machine.</p>
+<p>Part of the Vektor ecosystem alongside <a
+href="https://github.com/Vektor-Memory/Vex">Vex</a> and <a
+href="https://vektormemory.com">Slipstream</a>.</p>
+<hr />
+<h2 id="the-problem">The problem</h2>
+<p>Every AI tool remembers inside its own walls. Claude forgets what you
+did in Cursor. Cursor forgets what you built in Windsurf. The moment you
+switch tools — or open a new session — context resets to zero.</p>
+<p>Via is the bus between them.</p>
+<hr />
+<h2 id="install">Install</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> @vektor/via</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> <span class="at">--help</span></span></code></pre></div>
+<p><strong>Requirements:</strong> Node.js &gt;= 18. No native
+dependencies.</p>
+<hr />
+<h2 id="what-makes-via-different">What makes Via different</h2>
+<h3 id="via-diff-compare-ai-tools-side-by-side"><code>via diff</code> —
+Compare AI tools side by side</h3>
+<p>The feature no other tool has. Ask the same question to Claude and
+Cursor, then see exactly where they agree, diverge, and what unique
+concepts each one brought.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff <span class="st">&quot;explain microservices&quot;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff add claude <span class="st">&quot;Microservices split apps into small independent services...&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff add cursor <span class="st">&quot;Microservices are small focused services that communicate via APIs...&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff show</span></code></pre></div>
+<pre><code>┌─ DIFF — explain microservices ────────────────
+│ claude          12 words
+│ cursor          14 words
+│ similarity      21% word overlap
+│
+│  claude                          |  cursor
+│  ──────────────────────────────  |  ──────────────────────────────
+│  Microservices split apps into   |  Microservices are small focused
+│  small independent services...   |  services that communicate via...
+│
+│ claude unique terms  independent, database
+│ cursor unique terms  focused, communicate, deployed
+└───────────────────────────────────────────────</code></pre>
+<h3
+id="via-memory-relationship-aware-code-indexing"><code>via memory</code>
+— Relationship-aware code indexing</h3>
+<p>Point at any folder and Via extracts symbols, imports, and function
+definitions from 10+ languages — then builds an import graph in SQLite.
+Search traverses relationships, not just text.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> memory add <span class="at">--file</span> ./src/</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># → extracts symbols + import edges from JS/TS/Python/Go/Rust</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># → via memory search &quot;auth&quot; returns auth.js + every file that imports it</span></span></code></pre></div>
+<pre><code>┌─ MEMORY — SEARCH: auth ───────────────────────
+│
+│  Direct matches (2 files)
+│    ● auth.js       ./src/auth.js
+│    ● config.js     ./src/config.js
+│
+│  Related via imports (3 files)
+│    ○ server.js     ./src/server.js
+│    ○ middleware.js ./src/middleware.js
+│    ○ routes.js     ./src/routes/auth.js
+└───────────────────────────────────────────────</code></pre>
+<p>No embeddings. No API calls. Pure local SQLite graph.</p>
+<hr />
+<h2 id="commands">Commands</h2>
+<h3 id="via-init"><code>via init</code></h3>
+<p>Wire via into every AI tool detected — one command, fully
+configured.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> init           <span class="co"># writes MCP config for Claude Desktop, Cursor, Windsurf</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> init <span class="at">--dry-run</span> <span class="co"># preview what would be written</span></span></code></pre></div>
+<h3 id="via-memory"><code>via memory</code></h3>
+<p>Fact storage + relationship-aware codebase indexing.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> memory add <span class="st">&quot;JWT tokens expire in 1h&quot;</span>          <span class="co"># store a fact</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> memory add <span class="at">--file</span> ./src/                      <span class="co"># index a codebase</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> memory search <span class="st">&quot;auth&quot;</span>                          <span class="co"># search + related files</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> memory graph                                  <span class="co"># show import relationships</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> memory list                                   <span class="co"># list indexed files + facts</span></span></code></pre></div>
+<h3 id="via-task"><code>via task</code></h3>
+<p>Shared persistent task board any AI tool can read and write via
+MCP.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> task add <span class="st">&quot;refactor auth module&quot;</span> <span class="at">--high</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> task</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> task done <span class="op">&lt;</span>id<span class="op">&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> task start <span class="op">&lt;</span>id<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="via-log"><code>via log</code></h3>
+<p>Unified activity log. Auto-captures Claude Code sessions.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> log <span class="st">&quot;decided to use postgres&quot;</span> <span class="at">--tool</span> claude</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> log <span class="at">--scan</span>     <span class="co"># one-shot capture of all Claude Code sessions</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> log <span class="at">--watch</span>    <span class="co"># live capture as sessions complete</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> log <span class="at">--today</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> log search <span class="st">&quot;postgres&quot;</span></span></code></pre></div>
+<h3 id="via-ask"><code>via ask</code></h3>
+<p>Route a question to the right AI tool — and open it.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> ask <span class="st">&quot;should I use postgres or sqlite?&quot;</span>        <span class="co"># opens recommended tool</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> ask <span class="st">&quot;refactor auth module&quot;</span> <span class="at">--tool</span> cursor      <span class="co"># force a specific tool</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> ask <span class="st">&quot;explain this architecture&quot;</span> <span class="at">--no-open</span>     <span class="co"># recommend only</span></span></code></pre></div>
+<h3 id="via-diff"><code>via diff</code></h3>
+<p>Compare what two AI tools said about the same prompt.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff <span class="st">&quot;your prompt&quot;</span>          <span class="co"># register a new prompt</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff add claude <span class="st">&quot;...&quot;</span>       <span class="co"># store Claude&#39;s response</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff add cursor <span class="st">&quot;...&quot;</span>       <span class="co"># store Cursor&#39;s response</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff show                   <span class="co"># side-by-side + unique terms</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> diff list                   <span class="co"># all saved comparisons</span></span></code></pre></div>
+<h3 id="via-handoff"><code>via handoff</code></h3>
+<p>Export your full working state before switching tools.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> handoff <span class="at">--export</span>                        <span class="co"># saves .vstate.json</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> handoff <span class="at">--import</span> ./sprint3.vstate.json  <span class="co"># restore on any machine</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> handoff <span class="at">--list</span></span></code></pre></div>
+<h3 id="via-serve"><code>via serve</code></h3>
+<p>Run Via as an MCP server. Claude Desktop, Cursor, and Windsurf can
+call via tools natively.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> serve           <span class="co"># stdio (Claude Desktop, Cursor)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">via</span> serve <span class="at">--sse</span>     <span class="co"># HTTP+SSE mode</span></span></code></pre></div>
+<p>Claude Desktop config:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;via&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;via&quot;</span><span class="fu">,</span> <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">]</span> <span class="fu">}</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Or just run <code>via init</code> — it writes this automatically.</p>
+<hr />
+<h2 id="mcp-tools-via-serve">MCP Tools (via serve)</h2>
+<p>When running as an MCP server, Claude Desktop and Cursor can
+call:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>via_task_list</code></td>
+<td>List open tasks</td>
+</tr>
+<tr>
+<td><code>via_task_add</code></td>
+<td>Add a task</td>
+</tr>
+<tr>
+<td><code>via_task_done</code></td>
+<td>Mark task done</td>
+</tr>
+<tr>
+<td><code>via_memory_add</code></td>
+<td>Store a fact</td>
+</tr>
+<tr>
+<td><code>via_memory_search</code></td>
+<td>Search stored facts (relationship-aware)</td>
+</tr>
+<tr>
+<td><code>via_log</code></td>
+<td>Log a decision or event</td>
+</tr>
+<tr>
+<td><code>via_context</code></td>
+<td>Pull formatted memory context</td>
+</tr>
+<tr>
+<td><code>via_status</code></td>
+<td>Ecosystem health check</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="vektor-ecosystem">Vektor ecosystem</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/Vektor-Memory/Vex">Vex</a></td>
+<td>Migrate agent memory between vector stores</td>
+</tr>
+<tr>
+<td><strong>Via</strong></td>
+<td>Route context and execution across all AI tools</td>
+</tr>
+<tr>
+<td><a href="https://vektormemory.com">Slipstream</a></td>
+<td>The intelligence engine — graph memory, vector search,
+multimodal</td>
+</tr>
+</tbody>
+</table>
+<p>Via uses SQLite locally. No embeddings, no API calls for indexing.
+When you need semantic search, graph traversal, or team-shared context —
+upgrade to <a href="https://vektormemory.com">Vektor Slipstream</a>.</p>
+<hr />
+<h2 id="roadmap">Roadmap</h2>
+<p><strong>v0.2 — current</strong> - <code>via init</code>,
+<code>via memory</code>, <code>via task</code>, <code>via log</code>,
+<code>via ask</code>, <code>via diff</code> - Relationship-aware
+codebase indexing — symbols + import graph in SQLite - Claude Code
+session auto-capture - MCP server with 8 tools - Claude Desktop, Cursor,
+Windsurf support</p>
+<p><strong>v0.3 — coming</strong> - Import edge traversal on Windows
+path fix - <code>via memory search</code> semantic upgrade via
+Slipstream - Team-shared task board - <code>via diff --live</code>
+real-time comparison</p>
+<hr />
+<h2 id="license">License</h2>
+<p>Apache 2.0 — free forever. Built by <a
+href="https://vektormemory.com">Vektor Memory</a>.</p>
