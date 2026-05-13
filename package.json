@@ -12,6 +12,12 @@
     "test": "node --test tests/",
     "prepack": "node -e \"const fs=require('fs');const v=JSON.parse(fs.readFileSync('package.json')).version;let c=fs.readFileSync('via.mjs','utf8');c=c.replace(/const VERSION = '[^']+'/,\\`const VERSION = '\\${v}'\\`);fs.writeFileSync('via.mjs',c);\""
   },
+  "files": [
+    "via.mjs",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
   "keywords": [
     "mcp",
     "ai",
@@ -22,7 +28,9 @@
     "context",
     "agent",
     "vektor",
-    "universal"
+    "universal",
+    "cli",
+    "tool-integration"
   ],
   "author": "Vektor Memory <hello@vektormemory.com>",
   "license": "Apache-2.0",
@@ -32,7 +40,12 @@
     "url": "https://github.com/Vektor-Memory/Via.git"
   },
   "bugs": {
-    "url": "https://github.com/Vektor-Memory/Via/issues"
+    "url": "https://github.com/Vektor-Memory/Via/issues",
+    "email": "hello@vektormemory.com"
+  },
+  "funding": {
+    "type": "other",
+    "url": "https://vektormemory.com/downloads"
   },
   "engines": {
     "node": ">=18"
