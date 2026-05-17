@@ -1,3 +1,4 @@
+
 # Via — by Vektor Memory
 
 > Route anything. Remember everything. Works everywhere.
@@ -25,6 +26,8 @@ Via is the bus between them.
 ---
 
 <img width="1040" height="535" alt="image" src="https://github.com/user-attachments/assets/4966388f-75db-413b-bc12-9e2427e078fb" />
+<img width="1068" height="439" alt="via research " src="https://github.com/user-attachments/assets/2085f5d9-4fc3-4477-93ac-be9b9dd1b023" />
+<img width="1056" height="572" alt="via research 2" src="https://github.com/user-attachments/assets/f60cd55f-71e8-4f90-a6ca-5a8bf6b7769b" />
 
 ## Install
 
