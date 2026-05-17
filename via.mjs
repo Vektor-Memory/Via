@@ -77,6 +77,7 @@ const COMMANDS = {
   ask:     'Route a question to the right tool and open it',
   diff:    'Compare responses from two AI tools side by side',
   serve:   'Run as MCP server (Claude Desktop, Cursor, Windsurf)',
+  research: 'Autonomous parameter tuning with cross-session memory',
   // legacy — kept for compat
   context: 'Inject memory into any AI tool',
   scaffold:'Deploy AI config files to a project',
@@ -88,7 +89,7 @@ function cmdHelp() {
   banner();
 
   box('COMMANDS');
-  const primary = ['init','memory','convert','task','handoff','log','ask','diff','serve'];
+  const primary = ['init','memory','convert','task','handoff','log','ask','diff','serve','research'];
   for (const cmd of primary) {
     row(W(cmd), Gr(COMMANDS[cmd]));
   }
