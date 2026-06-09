@@ -1,5 +1,5 @@
 
-# Via — by Vektor Memory
+# Via — by Vektor Memory - v0.3.0
 
 > Route anything. Remember everything. Works everywhere.
 
