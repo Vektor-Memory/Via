@@ -4,7 +4,7 @@ All notable changes to Via are documented here.
 
 ---
 
-## [0.4.1] - 2026-06-15
+## [0.4.2] - 2026-06-15
 
 ### Added: Interactive TUI — full arrow-key command palette
 
