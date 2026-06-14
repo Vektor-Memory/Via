@@ -1,4 +1,4 @@
-# Via — by Vektor Memory - v0.4.1
+# Via — by Vektor Memory - v0.4.2
 
 > Route anything. Remember everything. Works everywhere.
 >
