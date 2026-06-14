@@ -1,6 +1,9 @@
-# Via — by Vektor Memory
+# Via — by Vektor Memory - v0.4.0
 
 > Route anything. Remember everything. Works everywhere.
+>
+> <img width="1094" height="927" alt="Screenshot 2026-06-14 105809" src="https://github.com/user-attachments/assets/34c6a92f-9678-41fc-8645-6d6365f51af1" />
+
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/@vektormemory/via)](https://npmjs.com/package/@vektormemory/via)
