@@ -1,8 +1,9 @@
-# Via — by Vektor Memory - v0.4.0
+# Via — by Vektor Memory - v0.4.1
 
 > Route anything. Remember everything. Works everywhere.
 >
-> <img width="1094" height="927" alt="Screenshot 2026-06-14 105809" src="https://github.com/user-attachments/assets/34c6a92f-9678-41fc-8645-6d6365f51af1" />
+<img width="926" height="458" alt="image" src="https://github.com/user-attachments/assets/297b1e7f-0940-42c3-9808-81bd01698414" />
+
 
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
