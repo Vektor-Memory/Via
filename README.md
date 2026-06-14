@@ -252,6 +252,17 @@ Slipstream   Graph memory, vector search, multimodal
 Via uses SQLite locally. No embeddings, no API calls for indexing. When you need semantic search, graph traversal, or team-shared context — upgrade to [Vektor Slipstream](https://vektormemory.com).
 
 ---
+[0.4.2] - 2026-06-15
+
+Added: Interactive TUI — full arrow-key command palette
+
+Running via with no arguments now launches an Ink-powered terminal UI instead
+of showing plain-text help. Every command has a guided wizard that builds the
+correct flags from step-by-step prompts — no flag memorisation required.
+
+bashvia          # launches interactive TUI (real TTY only)
+via --help   # plain-text help unchanged
+via prompt "add auth to the API"   # direct CLI unchanged
 
 ## Roadmap
 
