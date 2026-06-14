@@ -234,6 +234,61 @@ async function searchMemory(db, query, depth = 1) {
   return { matched: [...matched], related: [...related], manual };
 }
 
+
+// ── VEKTOR Slipstream semantic search (optional upgrade) ─────────────────────
+async function detectVektor() {
+  try {
+    const { createRequire } = await import('module');
+    const req = createRequire(import.meta.url);
+    const slipstream = req('vektor-slipstream');
+    const mem = await slipstream.createMemory({ silent: true });
+    return mem;
+  } catch { return null; }
+}
+
+async function semanticSearch(query, topK = 10) {
+  const vektor = await detectVektor();
+  if (!vektor) return null;
+  try {
+    const results = await vektor.recall(query, { topK, minScore: 0.3 });
+    return results || [];
+  } catch { return null; }
+}
+
+async function hybridSearch(db, query, topK = 10) {
+  // BM25 from local SQLite
+  const bm25Results = await searchMemory(db, query);
+
+  // Semantic from VEKTOR
+  const semanticResults = await semanticSearch(query, topK);
+
+  // RRF fusion
+  const scores = {};
+  const K = 60;
+
+  bm25Results.matched.forEach((f, rank) => {
+    scores[f] = (scores[f] || 0) + 1 / (K + rank + 1);
+  });
+  bm25Results.manual.forEach((r, rank) => {
+    const key = 'manual:' + r.id;
+    scores[key] = (scores[key] || 0) + 1 / (K + rank + 1);
+  });
+
+  if (semanticResults) {
+    semanticResults.forEach((r, rank) => {
+      const key = r.source || r.content?.slice(0, 40) || 'sem:' + rank;
+      scores[key] = (scores[key] || 0) + 1 / (K + rank + 1);
+    });
+  }
+
+  return {
+    bm25:     bm25Results,
+    semantic: semanticResults,
+    fused:    Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, topK),
+    hasVektor: !!semanticResults,
+  };
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export async function run(args) {
   const db = await getDb('memory');
@@ -295,8 +350,56 @@ export async function run(args) {
 
   // search
   if (subcmd === 'search' || subcmd === 'find') {
+    const doSemantic = args.includes('--semantic');
+    const doHybrid   = args.includes('--hybrid');
     const q = args.slice(1).filter(a => !a.startsWith('--')).join(' ');
     if (!q) { console.error('  via memory search requires a query'); process.exit(1); }
+
+    // Semantic / hybrid upgrade
+    if (doHybrid || doSemantic) {
+      if (doHybrid) {
+        const hybrid = await hybridSearch(db, q);
+        heading('MEMORY — HYBRID SEARCH: ' + q);
+        if (!hybrid.hasVektor) {
+          blank();
+          console.log('  │  ' + yellow('⚠') + ' VEKTOR not installed — BM25 only');
+          console.log('  │    Install: npm install -g vektor-slipstream');
+          blank();
+        } else {
+          blank();
+          console.log('  │  ' + green('Semantic + BM25 fusion (RRF)'));
+          blank();
+        }
+        hybrid.fused.slice(0, 8).forEach(([key, score]) => {
+          console.log('  │  ' + green('●') + ' ' + key.slice(0, 60) + dim('  ' + score.toFixed(4)));
+        });
+        if (hybrid.bm25.matched.length) {
+          blank();
+          console.log('  │  ' + steel('BM25 file matches: ' + hybrid.bm25.matched.length));
+          hybrid.bm25.matched.forEach(f => console.log('  │    ' + dim(basename(f))));
+        }
+        headingEnd(); return;
+      }
+      if (doSemantic) {
+        const semResults = await semanticSearch(q);
+        heading('MEMORY — SEMANTIC SEARCH: ' + q);
+        if (!semResults) {
+          blank();
+          console.log('  │  ' + yellow('⚠') + ' VEKTOR not installed — falling back to text search');
+          console.log('  │    npm install -g vektor-slipstream');
+          blank();
+        } else {
+          blank();
+          console.log('  │  ' + green(semResults.length + ' semantic results'));
+          semResults.slice(0, 8).forEach((r, i) => {
+            console.log('  │  ' + green('#' + (i+1)) + ' ' + (r.content || '').slice(0, 70).replace(/\n/g, ' '));
+            if (r.score) console.log('  │    ' + dim('score: ' + r.score.toFixed(4)));
+          });
+          blank();
+        }
+        headingEnd(); return;
+      }
+    }
 
     const { matched, related, manual } = await searchMemory(db, q);
 
@@ -405,6 +508,62 @@ export async function run(args) {
     db.prepare(`DELETE FROM memory`).run();
     db.prepare(`DELETE FROM memory_edges`).run();
     heading('MEMORY CLEARED'); label('status', red('all facts + edges deleted')); headingEnd(); return;
+  }
+
+  // sync — push local memory to VEKTOR
+  if (subcmd === 'sync') {
+    const vektor = await detectVektor();
+    if (!vektor) {
+      heading('MEMORY SYNC');
+      blank();
+      console.log('  │  ' + yellow('⚠') + ' VEKTOR Slipstream not installed');
+      console.log('  │    npm install -g vektor-slipstream');
+      blank();
+      headingEnd(); return;
+    }
+    const facts = db.prepare(`SELECT id, content, source, created_at FROM memory ORDER BY id DESC`).all();
+    heading('MEMORY — SYNC TO VEKTOR');
+    label('facts', String(facts.length));
+    blank();
+    let synced = 0;
+    for (const f of facts) {
+      try {
+        await vektor.store(f.content, {
+          tags: ['via-memory', f.source || 'manual'],
+          source: 'via-memory-sync',
+          importance: 3,
+        });
+        synced++;
+      } catch (e) {
+        console.log('  │  ' + red('✗') + ' ' + f.content.slice(0, 40) + ': ' + e.message);
+      }
+    }
+    blank();
+    label('synced', green(String(synced)) + dim(' / ' + facts.length));
+    label('backend', 'VEKTOR Slipstream (semantic recall enabled)');
+    headingEnd(); return;
+  }
+
+  // stats — memory statistics
+  if (subcmd === 'stats') {
+    const totalFacts  = db.prepare(`SELECT COUNT(*) as n FROM memory WHERE file_path=''`).get()?.n ?? 0;
+    const totalFiles  = db.prepare(`SELECT COUNT(DISTINCT file_path) as n FROM memory WHERE file_path!=''`).get()?.n ?? 0;
+    const totalChunks = db.prepare(`SELECT COUNT(*) as n FROM memory WHERE file_path!=''`).get()?.n ?? 0;
+    const totalEdges  = db.prepare(`SELECT COUNT(*) as n FROM memory_edges`).get()?.n ?? 0;
+    const vektor      = await detectVektor();
+    const oldest      = db.prepare(`SELECT created_at FROM memory ORDER BY id ASC LIMIT 1`).get();
+    heading('MEMORY — STATS');
+    blank();
+    label('manual facts',   green(String(totalFacts)));
+    label('indexed files',  green(String(totalFiles)));
+    label('file chunks',    String(totalChunks));
+    label('import edges',   String(totalEdges));
+    label('oldest entry',   oldest?.created_at || dim('none'));
+    blank();
+    label('VEKTOR backend', vektor ? green('connected (semantic search available)') : yellow('not installed — text search only'));
+    if (!vektor) console.log('  │    ' + dim('npm install -g vektor-slipstream  →  via memory sync'));
+    blank();
+    headingEnd(); return;
   }
 
   heading('MEMORY — USAGE');

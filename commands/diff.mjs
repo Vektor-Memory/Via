@@ -55,9 +55,156 @@ function sideBySide(a, b, width = 42) {
   return out.join('\n');
 }
 
+
+// ── Live comparison (streaming) ───────────────────────────────────────────────
+async function liveCompare(prompt, toolA, toolB, apiKeys) {
+  const { default: https } = await import('https');
+  const { default: http }  = await import('http');
+
+  console.log('');
+  console.log('  ┌─ LIVE COMPARISON ─────────────────────────────────────');
+  console.log('  │  Prompt: ' + prompt.slice(0, 60));
+  console.log('  │  Tools:  ' + toolA + '  vs  ' + toolB);
+  console.log('  └────────────────────────────────────────────────────────');
+  console.log('');
+
+  const results = { a: '', b: '' };
+  const labels  = { a: toolA.toUpperCase(), b: toolB.toUpperCase() };
+  const done    = { a: false, b: false };
+
+  // Stream from Anthropic
+  async function streamAnthropic(key, label, slot) {
+    return new Promise((resolve, reject) => {
+      const body = JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        stream: true,
+        messages: [{ role: 'user', content: prompt }],
+      });
+      const req = https.request({
+        hostname: 'api.anthropic.com',
+        path: '/v1/messages',
+        method: 'POST',
+        headers: {
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+          'content-length': Buffer.byteLength(body),
+        },
+      }, res => {
+        process.stdout.write('\n  [' + label + '] ');
+        res.on('data', chunk => {
+          const lines = chunk.toString().split('\n');
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            try {
+              const data = JSON.parse(line.slice(6));
+              const text = data.delta?.text || '';
+              if (text) { results[slot] += text; process.stdout.write(text); }
+            } catch {}
+          }
+        });
+        res.on('end', () => { process.stdout.write('\n'); resolve(); });
+      });
+      req.on('error', reject);
+      req.write(body);
+      req.end();
+    });
+  }
+
+  // Stream from OpenAI
+  async function streamOpenAI(key, label, slot, model = 'gpt-4o-mini') {
+    return new Promise((resolve, reject) => {
+      const body = JSON.stringify({
+        model,
+        max_tokens: 1024,
+        stream: true,
+        messages: [{ role: 'user', content: prompt }],
+      });
+      const req = https.request({
+        hostname: 'api.openai.com',
+        path: '/v1/chat/completions',
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + key,
+          'content-type': 'application/json',
+          'content-length': Buffer.byteLength(body),
+        },
+      }, res => {
+        process.stdout.write('\n  [' + label + '] ');
+        res.on('data', chunk => {
+          const lines = chunk.toString().split('\n');
+          for (const line of lines) {
+            if (!line.startsWith('data: ') || line.includes('[DONE]')) continue;
+            try {
+              const data = JSON.parse(line.slice(6));
+              const text = data.choices?.[0]?.delta?.content || '';
+              if (text) { results[slot] += text; process.stdout.write(text); }
+            } catch {}
+          }
+        });
+        res.on('end', () => { process.stdout.write('\n'); resolve(); });
+      });
+      req.on('error', reject);
+      req.write(body);
+      req.end();
+    });
+  }
+
+  // Run both streams concurrently
+  const streamA = toolA === 'claude' && process.env.ANTHROPIC_API_KEY
+    ? streamAnthropic(process.env.ANTHROPIC_API_KEY, labels.a, 'a')
+    : toolA === 'openai' && process.env.OPENAI_API_KEY
+    ? streamOpenAI(process.env.OPENAI_API_KEY, labels.a, 'a')
+    : Promise.resolve();
+
+  const streamB = toolB === 'claude' && process.env.ANTHROPIC_API_KEY
+    ? streamAnthropic(process.env.ANTHROPIC_API_KEY, labels.b, 'b')
+    : toolB === 'openai' && process.env.OPENAI_API_KEY
+    ? streamOpenAI(process.env.OPENAI_API_KEY, labels.b, 'b')
+    : Promise.resolve();
+
+  await Promise.all([streamA, streamB]);
+
+  // Summary diff
+  const aWords = results.a.split(/\s+/).length;
+  const bWords = results.b.split(/\s+/).length;
+
+  console.log('');
+  console.log('  ┌─ COMPARISON SUMMARY ──────────────────────────────────');
+  console.log('  │  [' + labels.a + '] ' + aWords + ' words');
+  console.log('  │  [' + labels.b + '] ' + bWords + ' words');
+  console.log('  │  Word delta: ' + (aWords - bWords > 0 ? '+' : '') + (aWords - bWords));
+  console.log('  └────────────────────────────────────────────────────────');
+  console.log('');
+
+  return results;
+}
+
 export async function run(args) {
   const db = await getDb('diffs');
   await ensureSchema(db);
+
+  // via diff --live "prompt" --tools claude,openai
+  const doLive = args.includes('--live');
+  if (doLive) {
+    const toolsIdx = args.indexOf('--tools');
+    const toolsStr = toolsIdx !== -1 ? args[toolsIdx + 1] : 'claude,openai';
+    const [toolA, toolB] = toolsStr.split(',').map(t => t.trim().toLowerCase());
+    const promptParts = args.filter(a => !a.startsWith('--') && a !== toolsStr);
+    const livePrompt = promptParts.join(' ').trim();
+    if (!livePrompt) {
+      console.error('  Usage: via diff --live "your prompt" [--tools claude,openai]');
+      process.exit(1);
+    }
+    const results = await liveCompare(livePrompt, toolA || 'claude', toolB || 'openai', {});
+    // Save to DB
+    const db = await getDb('diff');
+    await ensureSchema(db);
+    db.prepare(`INSERT INTO diffs (prompt, tool, response) VALUES (?,?,?)`).run(livePrompt, toolA, results.a);
+    db.prepare(`INSERT INTO diffs (prompt, tool, response) VALUES (?,?,?)`).run(livePrompt, toolB, results.b);
+    return;
+  }
 
   const subcmd = args[0];
   const asJSON = args.includes('--json');

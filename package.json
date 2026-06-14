@@ -1,56 +1,69 @@
 {
-  "name": "@vektormemory/via",
-  "version": "0.3.1",
-  "description": "Route anything. Remember everything. Works everywhere. Universal AI tool integration layer by Vektor Memory.",
-  "type": "module",
-  "main": "via.mjs",
-  "bin": {
-    "via": "./via.mjs"
-  },
-  "scripts": {
-    "start": "node via.mjs",
-    "test": "node --test tests/",
-    "prepack": "node -e \"const fs=require('fs');const v=JSON.parse(fs.readFileSync('package.json')).version;let c=fs.readFileSync('via.mjs','utf8');c=c.replace(/const VERSION = '[^']+'/,\\`const VERSION = '\\${v}'\\`);fs.writeFileSync('via.mjs',c);\""
-  },
-  "files": [
-    "via.mjs",
-    "README.md",
-    "LICENSE",
-    "SECURITY.md"
-  ],
-  "keywords": [
-    "mcp",
-    "ai",
-    "memory",
-    "claude",
-    "cursor",
-    "windsurf",
-    "context",
-    "agent",
-    "vektor",
-    "universal",
-    "cli",
-    "tool-integration"
-  ],
-  "author": "Vektor Memory <hello@vektormemory.com>",
-  "license": "Apache-2.0",
-  "homepage": "https://github.com/Vektor-Memory/Via",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Vektor-Memory/Via.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Vektor-Memory/Via/issues",
-    "email": "hello@vektormemory.com"
-  },
-  "funding": {
-    "type": "other",
-    "url": "https://vektormemory.com/downloads"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "sql.js": "^1.14.1"
-  }
+    "name":  "@vektormemory/via",
+    "version":  "0.4.0",
+    "description":  "Route anything. Remember everything. Works everywhere. Universal AI tool integration layer by Vektor Memory.",
+    "type":  "module",
+    "main":  "via.mjs",
+    "bin":  {
+                "via":  "./via.mjs"
+            },
+    "scripts":  {
+                    "start":  "node via.mjs",
+                    "test":  "python test_via_prompt.py"
+                },
+    "files":  [
+                  "via.mjs",
+                  "commands/",
+                  "connectors/",
+                  "utils/",
+                  "README.md",
+                  "CHANGELOG.md",
+                  "LICENSE",
+                  "SECURITY.md",
+                  "SPEC.md"
+              ],
+    "keywords":  [
+                     "mcp",
+                     "ai",
+                     "memory",
+                     "claude",
+                     "claude-code",
+                     "codex",
+                     "gemini-cli",
+                     "cursor",
+                     "windsurf",
+                     "context",
+                     "agent",
+                     "prompt",
+                     "prompt-engineering",
+                     "self-improving",
+                     "vektor",
+                     "universal",
+                     "cli",
+                     "tool-integration",
+                     "bm25",
+                     "semantic-search",
+                     "task-board"
+                 ],
+    "author":  "Vektor Memory \u003chello@vektormemory.com\u003e",
+    "license":  "Apache-2.0",
+    "homepage":  "https://vektormemory.com",
+    "repository":  {
+                       "type":  "git",
+                       "url":  "https://github.com/Vektor-Memory/Via.git"
+                   },
+    "bugs":  {
+                 "url":  "https://github.com/Vektor-Memory/Via/issues",
+                 "email":  "hello@vektormemory.com"
+             },
+    "funding":  {
+                    "type":  "other",
+                    "url":  "https://vektormemory.com/downloads"
+                },
+    "engines":  {
+                    "node":  "\u003e=18"
+                },
+    "dependencies":  {
+                         "sql.js":  "^1.14.1"
+                     }
 }

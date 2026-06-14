@@ -192,7 +192,148 @@ function showFormats() {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
+
+// ── Batch folder conversion ───────────────────────────────────────────────────
+import { readdirSync, statSync, existsSync as _existsSync, mkdirSync } from 'fs';
+import { join as _join, extname as _extname, basename as _basename, dirname } from 'path';
+import { execSync as _execSync } from 'child_process';
+
+function collectConvertFiles(dir, ext) {
+  const files = [];
+  const skip  = new Set(['node_modules', '.git', 'dist', 'build', '__pycache__']);
+  function walk(d) {
+    try {
+      readdirSync(d).forEach(name => {
+        if (skip.has(name) || name.startsWith('.')) return;
+        const full = _join(d, name);
+        try {
+          if (statSync(full).isDirectory()) return walk(full);
+          if (!ext || _extname(name).toLowerCase() === '.' + ext.toLowerCase().replace(/^\./, '')) {
+            files.push(full);
+          }
+        } catch {}
+      });
+    } catch {}
+  }
+  walk(dir);
+  return files;
+}
+
+async function batchConvert(srcDir, targetExt, opts = {}) {
+  const { skipExisting = true, outputDir = null, dryRun = false } = opts;
+  const files = collectConvertFiles(srcDir, null);
+
+  // Group by convertible types
+  const convertible = files.filter(f => {
+    const ext = _extname(f).toLowerCase();
+    const supported = ['.pdf','.docx','.doc','.png','.jpg','.jpeg','.gif','.webp',
+                       '.mp4','.mov','.avi','.mkv','.mp3','.wav','.ogg','.flac'];
+    return supported.includes(ext);
+  });
+
+  console.log('');
+  console.log('  ┌─ BATCH CONVERT ───────────────────────────────────────');
+  console.log('  │  Source: ' + srcDir);
+  console.log('  │  Files:  ' + convertible.length + ' convertible');
+  console.log('  │  Target: ' + targetExt);
+  console.log('  │  Mode:   ' + (dryRun ? 'dry run' : 'convert'));
+  console.log('  └────────────────────────────────────────────────────────');
+  console.log('');
+
+  const results = { converted: 0, skipped: 0, failed: 0, errors: [] };
+
+  for (let i = 0; i < convertible.length; i++) {
+    const src  = convertible[i];
+    const base = _basename(src, _extname(src));
+    const outDir = outputDir || dirname(src);
+    const dest = _join(outDir, base + '.' + targetExt.replace(/^\./, ''));
+
+    const pct = Math.round((i / convertible.length) * 100);
+    const bar = '█'.repeat(Math.floor(pct / 5)) + '░'.repeat(20 - Math.floor(pct / 5));
+    process.stdout.write('\r  [' + bar + '] ' + pct + '%  ' + _basename(src).slice(0, 30).padEnd(30));
+
+    if (skipExisting && _existsSync(dest)) {
+      results.skipped++;
+      continue;
+    }
+
+    if (dryRun) {
+      console.log('');
+      console.log('  → ' + _basename(src) + ' → ' + _basename(dest));
+      results.converted++;
+      continue;
+    }
+
+    try {
+      const srcExt  = _extname(src).toLowerCase();
+      const destExt = '.' + targetExt.replace(/^\./, '').toLowerCase();
+
+      // Route to correct converter
+      let cmd = null;
+      if (['.png','.jpg','.jpeg','.gif','.webp'].includes(srcExt) &&
+          ['.png','.jpg','.jpeg','.gif','.webp'].includes(destExt)) {
+        cmd = `convert "${src}" "${dest}"`;  // ImageMagick
+      } else if (['.mp4','.mov','.avi','.mkv'].includes(srcExt) ||
+                 ['.mp3','.wav','.ogg','.flac'].includes(srcExt)) {
+        cmd = `ffmpeg -i "${src}" -y "${dest}" 2>/dev/null`;
+      } else if (srcExt === '.pdf' && destExt === '.md') {
+        cmd = `pandoc "${src}" -o "${dest}" 2>/dev/null || pdftotext "${src}" "${dest}" 2>/dev/null`;
+      } else if (['.docx','.doc'].includes(srcExt)) {
+        cmd = `pandoc "${src}" -o "${dest}" 2>/dev/null || libreoffice --headless --convert-to ${targetExt} "${src}" --outdir "${outDir}" 2>/dev/null`;
+      }
+
+      if (cmd) {
+        _execSync(cmd, { timeout: 60000 });
+        results.converted++;
+      } else {
+        results.errors.push({ file: src, error: 'No converter for ' + srcExt + ' → ' + destExt });
+        results.failed++;
+      }
+    } catch (e) {
+      results.errors.push({ file: src, error: e.message.slice(0, 80) });
+      results.failed++;
+    }
+  }
+
+  process.stdout.write('\r' + ' '.repeat(60) + '\r');
+  console.log('');
+  console.log('  ┌─ BATCH RESULT ────────────────────────────────────────');
+  console.log('  │  converted: ' + results.converted);
+  console.log('  │  skipped:   ' + results.skipped + (skipExisting ? ' (already exist)' : ''));
+  console.log('  │  failed:    ' + results.failed);
+  if (results.errors.length) {
+    console.log('  │');
+    results.errors.slice(0, 5).forEach(e =>
+      console.log('  │  ✗ ' + _basename(e.file) + ': ' + e.error)
+    );
+  }
+  console.log('  └────────────────────────────────────────────────────────');
+  console.log('');
+
+  return results;
+}
+
 export async function run(args) {
+  // via convert --batch ./folder --to mp3 [--skip-existing] [--dry-run] [--out ./output]
+  const doBatch = args.includes('--batch');
+  if (doBatch) {
+    const batchIdx  = args.indexOf('--batch');
+    const toIdx     = args.indexOf('--to');
+    const outIdx    = args.indexOf('--out');
+    const srcDir    = args[batchIdx + 1];
+    const targetExt = args[toIdx + 1] || 'mp3';
+    const outputDir = outIdx !== -1 ? args[outIdx + 1] : null;
+    const dryRun    = args.includes('--dry-run');
+    const skipExist = !args.includes('--no-skip');
+
+    if (!srcDir) {
+      console.error('  Usage: via convert --batch <folder> --to <ext> [--dry-run] [--out <dir>] [--no-skip]');
+      process.exit(1);
+    }
+    await batchConvert(srcDir, targetExt, { skipExisting: skipExist, outputDir, dryRun });
+    return;
+  }
+
   const asJSON = args.includes('--json');
   const ingest = args.includes('--ingest');   // pipe output into via memory
   const dryRun = args.includes('--dry-run');

@@ -1,15 +1,9 @@
-
-# Via — by Vektor Memory - v0.3.0
+# Via — by Vektor Memory
 
 > Route anything. Remember everything. Works everywhere.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/@vektormemory/via)](https://npmjs.com/package/@vektormemory/via)
-
-https://medium.com/@vektormemory/all-roads-lead-to-ai-rome-1c601f1ec440
-
-<img width="1077" height="404" alt="image" src="https://github.com/user-attachments/assets/b6d5ceac-a246-4f75-9e9a-181d5252e087" />
-
 
 Via is the universal integration layer for AI tools. One CLI that connects Claude, Cursor, Windsurf, and ChatGPT to a shared memory, task board, and context bus — so your work follows you across every tool, every session, every machine.
 
@@ -24,10 +18,6 @@ Every AI tool remembers inside its own walls. Claude forgets what you did in Cur
 Via is the bus between them.
 
 ---
-
-<img width="1040" height="535" alt="image" src="https://github.com/user-attachments/assets/4966388f-75db-413b-bc12-9e2427e078fb" />
-<img width="1068" height="439" alt="via research " src="https://github.com/user-attachments/assets/2085f5d9-4fc3-4477-93ac-be9b9dd1b023" />
-<img width="1056" height="572" alt="via research 2" src="https://github.com/user-attachments/assets/f60cd55f-71e8-4f90-a6ca-5a8bf6b7769b" />
 
 ## Install
 
@@ -261,20 +251,21 @@ Via uses SQLite locally. No embeddings, no API calls for indexing. When you need
 
 ## Roadmap
 
-**v0.3 — current**
-- `via init`, `via memory`, `via convert`, `via task`, `via log`, `via ask`, `via diff`
-- Relationship-aware codebase indexing — symbols + import graph in SQLite
-- Local file conversion pipeline — FFmpeg, Pandoc, LibreOffice, ImageMagick
-- Claude Code session auto-capture
-- MCP server with 8 tools
-- Claude Desktop, Cursor, Windsurf support
+**v0.4 - current**
+- `via prompt` - self-improving historically-informed prompt engine (BM25, AVOID store, JIT abstraction, confidence UI)
+- `via memory` semantic search - BM25 + VEKTOR hybrid fusion, sync, stats
+- Team-shared task board - kanban view, assign, share via Git JSON
+- `via diff --live` - real-time streaming side-by-side comparison
+- `via convert --batch` - recursive folder conversion with progress bar
+- Git hook integration - implicit prompt feedback capture on commit/revert
+- Export to CLAUDE.md, YAML, Codex, Gemini TOML
 
-**v0.4 — coming**
-- `via memory` semantic search upgrade via Slipstream
-- Team-shared task board
-- `via diff --live` real-time comparison
-- `via convert` batch mode — convert entire folders
-
+**v0.5 - coming**
+- `via prompt` workflow evolution - improve task sequences not just single prompts
+- `via memory` multimodal ingestion - images, PDFs, audio transcripts
+- Cross-team prompt pattern sharing via Git
+- `via skills` - install VEKTOR memory skills into Claude Code, Codex, Gemini CLI
+- Sovereign sync providers - Codeberg and Gitea
 ---
 
 ## License
