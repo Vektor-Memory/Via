@@ -15,11 +15,10 @@ Part of the Vektor ecosystem alongside [Vex](https://github.com/Vektor-Memory/Ve
 
 ---
 
-## The problem
-
+## The Solution
 Every AI tool remembers inside its own walls. Claude forgets what you did in Cursor. Cursor forgets what you built in Windsurf. The moment you switch tools — or open a new session — context resets to zero.
 
-Via is the bus between them.
+Via is the bus between them, which solves these issues.
 
 ---
 
